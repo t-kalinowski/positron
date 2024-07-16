@@ -108,6 +108,7 @@ export class CondaInstaller extends ModuleInstaller {
         }
         args.push(moduleName);
         args.push('-y');
+        args.push('--force-reinstall');
         return {
             args,
             execPath: condaFile,
