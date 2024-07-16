@@ -103,12 +103,11 @@ export class CondaInstaller extends ModuleInstaller {
         if (flags & ModuleInstallFlags.updateDependencies) {
             args.push('--update-deps');
         }
-        if (flags & ModuleInstallFlags.reInstall) {
+        if (flags & ModuleInstallFlags.reInstall || [Product.ipykernel].map(translateProductToModule).includes(moduleName)) {
             args.push('--force-reinstall');
         }
         args.push(moduleName);
         args.push('-y');
-        args.push('--force-reinstall');
         return {
             args,
             execPath: condaFile,
