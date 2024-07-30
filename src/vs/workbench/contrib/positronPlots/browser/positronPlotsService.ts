@@ -41,6 +41,8 @@ import { PreviewHtml } from 'vs/workbench/contrib/positronPreview/browser/previe
 import { IOpenerService } from 'vs/platform/opener/common/opener';
 import { IExtensionService } from 'vs/workbench/services/extensions/common/extensions';
 import { IPositronHoloViewsService } from 'vs/workbench/services/positronHoloViews/common/positronHoloViewsService';
+import { IEditorService } from 'vs/workbench/services/editor/common/editorService';
+import { URI } from 'vs/base/common/uri';
 
 /** The maximum number of recent executions to store. */
 const MaxRecentExecutions = 10;
@@ -122,7 +124,8 @@ export class PositronPlotsService extends Disposable implements IPositronPlotsSe
 		@IKeybindingService private readonly _keybindingService: IKeybindingService,
 		@IClipboardService private _clipboardService: IClipboardService,
 		@IDialogService private readonly _dialogService: IDialogService,
-		@IExtensionService private readonly _extensionService: IExtensionService) {
+		@IExtensionService private readonly _extensionService: IExtensionService,
+		@IEditorService private readonly _editorService: IEditorService) {
 		super();
 
 		// Register for language runtime service startups
@@ -906,6 +909,34 @@ export class PositronPlotsService extends Disposable implements IPositronPlotsSe
 		this._onDidSelectPlot.fire(client.id);
 		this._register(client);
 		this._showPlotsPane();
+	}
+
+	public async openEditor(): Promise<void> {
+		const plotClient = this._plots.find(plot => plot.id === this.selectedPlotId);
+		let plotUri: string | undefined;
+		if (plotClient instanceof StaticPlotClient) {
+			const staticPlot = plotClient as StaticPlotClient;
+			plotUri = staticPlot.uri;
+		}
+		if (plotClient instanceof PlotClientInstance) {
+			const dynamicPlot = plotClient as PlotClientInstance;
+			plotUri = dynamicPlot.lastRender?.uri;
+		}
+
+		if (!plotUri) {
+			throw new Error('Cannot open plot in editor: plot not found');
+		}
+
+		const editorPane = await this._editorService.openEditor({
+			resource: URI.from({
+				scheme: Schemas.positronPlotsEditor,
+				path: plotUri,
+			}),
+		});
+
+		if (!editorPane) {
+			throw new Error('Failed to open editor');
+		}
 	}
 
 	/**
