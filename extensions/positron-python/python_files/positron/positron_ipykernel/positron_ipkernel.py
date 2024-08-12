@@ -36,7 +36,7 @@ from .lsp import LSPService
 from .plots import PlotsService
 from .session_mode import SessionMode
 from .ui import UiService
-from .utils import JsonRecord, get_qualname
+from .utils import BackgroundJobQueue, JsonRecord, get_qualname
 from .variables import VariablesService
 
 
@@ -404,8 +404,10 @@ class PositronIPyKernel(IPythonKernel):
 
         super().__init__(**kwargs)
 
+        self.job_queue = BackgroundJobQueue()
+
         # Create Positron services
-        self.data_explorer_service = DataExplorerService(_CommTarget.DataExplorer)
+        self.data_explorer_service = DataExplorerService(_CommTarget.DataExplorer, self.job_queue)
         self.plots_service = PlotsService(_CommTarget.Plot, self.session_mode)
         self.ui_service = UiService()
         self.help_service = HelpService()
@@ -456,6 +458,9 @@ class PositronIPyKernel(IPythonKernel):
         Handle kernel shutdown.
         """
         logger.info("Shutting down the kernel")
+
+        # Shut down thread pool for background job queue
+        self.job_queue.shutdown()
 
         # Shutdown Positron services
         self.data_explorer_service.shutdown()
