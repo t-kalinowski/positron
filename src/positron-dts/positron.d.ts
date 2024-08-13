@@ -517,6 +517,7 @@ declare module 'positron' {
 		Ui = 'positron.ui',
 		Help = 'positron.help',
 		Connection = 'positron.connection',
+		Reticulate = 'positron.reticulate',
 		IPyWidget = 'jupyter.widget',
 		IPyWidgetControl = 'jupyter.widget.control',
 
