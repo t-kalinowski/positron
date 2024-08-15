@@ -100,7 +100,7 @@ export class PositronPlotsService extends Disposable implements IPositronPlotsSe
 	/** The currently selected history policy. */
 	private _selectedHistoryPolicy: HistoryPolicy = HistoryPolicy.Automatic;
 
-	private _editorPlots: Map<string, IPositronPlotClient> = new Map();
+	private _editorPlots = new Map<string, IPositronPlotClient>();
 
 	/**
 	 * A map of recently executed code; the map is from the parent ID to the
@@ -923,14 +923,12 @@ export class PositronPlotsService extends Disposable implements IPositronPlotsSe
 
 		let plotId: string | undefined;
 		if (plotClient instanceof StaticPlotClient) {
-			const staticPlot = plotClient as StaticPlotClient;
-			plotId = staticPlot.id;
-			this._editorPlots.set(staticPlot.id, staticPlot);
+			plotId = plotClient.id;
+			this._editorPlots.set(plotClient.id, plotClient);
 		}
 		if (plotClient instanceof PlotClientInstance) {
-			const dynamicPlot = plotClient as PlotClientInstance;
-			plotId = dynamicPlot.id;
-			this._editorPlots.set(dynamicPlot.id, dynamicPlot.clone());
+			plotId = plotClient.id;
+			this._editorPlots.set(plotClient.id, plotClient.clone());
 		}
 
 		if (!plotId) {
