@@ -62,17 +62,15 @@ async function createReticulateSession(runtimeMetadata: positron.LanguageRuntime
 
 		const kernelPath = `${__dirname}/../../positron-python/python_files/positron/positron_language_server.py`;
 
-		const code = `
-reticulate::import("rpytools.run")$\`_launch_lsp_server_on_thread\`(
-	"${kernelPath}",
-	reticulate::tuple(
-		'-f', "${connnectionFile}",
-		'--logfile', "${logFile}",
-		'--loglevel', '${logLevel}',
-		'--session-mode', 'console'
-	)
-)
-`;
+		const code = `reticulate:::py_run_file_on_thread(
+			file = "${kernelPath}",
+			args = c(
+				"-f", "${connnectionFile}",
+				"--logfile", "${logFile}",
+				"--loglevel", "${logLevel}",
+				"--session-mode", "console"
+			)
+		)`;
 
 		// Execute the piece of code that starts reticulate background session.
 		r_session.execute(
@@ -249,4 +247,3 @@ export function activate(context: vscode.ExtensionContext) {
 
 	return manager;
 }
-
